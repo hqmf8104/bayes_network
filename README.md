@@ -16,14 +16,17 @@ Leverages OpenAI’s GPT to extract evidence and hypotheses from a narrative, le
 
 3. **Formula**  
    \[
-   \beta_0 = \operatorname{logit}(p_0) = \ln\!\bigl(\tfrac{p_0}{1-p_0}\bigr),\quad
-   \beta_i = \ln(r_i)
-   \]
-   \[
-   P(H=\text{True}\mid X_1,\dots,X_k)
-     = \sigma\bigl(\beta_0 + \sum_{i=1}^k \beta_i\,X_i\bigr),
-   \quad \sigma(z)=\frac1{1+e^{-z}}
-   \]
+\beta_0 = \operatorname{logit}(p_0) \;=\; \ln\!\biggl(\frac{p_0}{1-p_0}\biggr),
+\quad
+\beta_i = \ln(r_i)
+\]
+
+\[
+P\bigl(H=\text{True}\mid X_1,\dots,X_k\bigr)
+= \sigma\!\Bigl(\beta_0 + \sum_{i=1}^k \beta_i\,X_i\Bigr),
+\quad
+\sigma(z)=\frac{1}{1 + e^{-z}}
+\]
 
 4. **Benefits**  
    - Compact: only \(k+1\) parameters vs.\ \(2^k\) rows in a full CPT  
