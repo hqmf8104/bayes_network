@@ -1,0 +1,10 @@
+# Python virtual environment
+BN1/
+
+# Byte-compiled files
+__pycache__/
+*.py[cod]
+
+# Temporary files
+*.swp
+*.tmp

@@ -1,0 +1,18 @@
+{
+  "evidence": [
+    {"id": "E1", "text": "Minister of Information Michael Makuei stated that elections could be held with or without the full implementation of the R-ARCCS."},
+    {"id": "E2", "text": "Currently, South Sudan is not on track to meet its commitments outlined by the R-ARCSS before elections are held in Dec 2024."},
+    {"id": "E3", "text": "The SPLM-IO Parliamentary Caucus issued a statement in which they highlighted continuous violations' of the Revitalized Agreement by the Sudan People's Liberation Movement (SPLM). These included the lack of fiscal transparency in the disbursement of oil revenues, the lack of political and civic space, and the state sponsored violence encountered in the constituencies that had incentivized the defections."},
+    {"id": "E4", "text": "These violations are corroborated by other reported and previous assessment."}
+  ],
+  "hypotheses": [
+    {"id": "H1", "text": "It is unlikely that UNMISS will associate themselves with these elections given the limited progress made in implementing R-ARCCS.", "likelihood": "Unlikely"},
+    {"id": "H2", "text": "This lack of progress makes countrywide violence related to the elections highly likely during Q4 2024.", "likelihood": "Highly Likely"}
+  ],
+  "connections": [
+    {"source": "E1", "target": "H1"},
+    {"source": "E2", "target": "H1"},
+    {"source": "E3", "target": "H2"},
+    {"source": "E4", "target": "H2"}
+  ]
+}
