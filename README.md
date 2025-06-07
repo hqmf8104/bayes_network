@@ -85,7 +85,7 @@ Houses the exact LLM prompt template used for narrative extraction.
  pip install -r requirements.txt
 
 4. **Set your OpenAI API key**
- ```bash 
+```bash 
  # macOS/Linux
  export OPENAI_API_KEY="your_api_key_here"
  # Windows PowerShell
