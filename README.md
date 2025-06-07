@@ -37,3 +37,66 @@ An interactive Streamlit application for constructing, editing, and analyzing ev
 ### Logistic Evidence‐Weighting Rule
 
 - **Baseline log-odds**  
+β₀ = logit(p₀) = ln(p₀ / (1 − p₀))
+
+- **Edge weight log-odds**  
+βᵢ = ln(rᵢ)
+
+- **Posterior probability**  
+P(H = True | X) = σ(β₀ + Σᵢ βᵢ·Xᵢ),
+where σ(z) = 1 / (1 + e^(−z))
+
+
+### Binary Network Propagation
+
+1. Enumerate all truth‐value combinations of input evidence.  
+2. Compute each combination’s probability and the corresponding hypothesis probability via the logistic rule.  
+3. Aggregate to yield exact posterior probabilities and full truth‐tables.
+
+---
+
+## Example Files
+
+- **test_json_001.json**  
+Contains two prebuilt networks for quick testing.
+
+- **test_prompt.md**  
+Houses the exact LLM prompt template used for narrative extraction.
+
+---
+
+## Installation & Usage
+
+1. **Clone the repo**  
+ ```bash
+ git clone https://github.com/hqmf8104/bayes_network.git
+ cd bayes_network
+
+2. **Clone the repo**  
+ ```bash
+ python -m venv .venv
+ # macOS/Linux
+ source .venv/bin/activate
+ # Windows PowerShell
+ .\.venv\Scripts\Activate
+
+3. **Install dependencies**
+ ```bash 
+ pip install -r requirements.txt
+
+4. **Set your OpenAI API key**
+ ```bash 
+ # macOS/Linux
+ export OPENAI_API_KEY="your_api_key_here"
+ # Windows PowerShell
+ $env:OPENAI_API_KEY="your_api_key_here"
+
+5. **Run the app**
+ ```bash 
+ streamlit run ui.py
+
+
+###License
+This project is licensed under the MIT License. Feel free to modify and extend!
+
+© 2025 Evidence Network Builder
