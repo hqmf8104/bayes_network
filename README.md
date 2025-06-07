@@ -68,35 +68,35 @@ Houses the exact LLM prompt template used for narrative extraction.
 ## Installation & Usage
 
 1. **Clone the repo**  
- ```bash
+```bash
  git clone https://github.com/hqmf8104/bayes_network.git
  cd bayes_network
-
+```
 2. **Clone the repo**  
- ```bash
+```bash
  python -m venv .venv
  # macOS/Linux
  source .venv/bin/activate
  # Windows PowerShell
  .\.venv\Scripts\Activate
-
+```
 3. **Install dependencies**
  ```bash 
  pip install -r requirements.txt
-
+```
 4. **Set your OpenAI API key**
 ```bash 
  # macOS/Linux
  export OPENAI_API_KEY="your_api_key_here"
  # Windows PowerShell
  $env:OPENAI_API_KEY="your_api_key_here"
-
+```
 5. **Run the app**
  ```bash 
  streamlit run ui.py
+```
 
-
-###License
+#### License
 This project is licensed under the MIT License. Feel free to modify and extend!
 
 © 2025 Evidence Network Builder
