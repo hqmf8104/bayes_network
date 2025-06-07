@@ -50,5 +50,22 @@
       "source": "H1",
       "target": "H2"
     }
-  ]
+  ],
+  "priors": {
+    "H1": "Remote Chance",
+    "H2": "Remote Chance"
+  },
+  "truth_probs": {
+    "E1": "Highly Unlikely",
+    "E2": "Likely or Probable",
+    "E3": "Almost Certain",
+    "E4": "Highly Likely"
+  },
+  "edge_strengths": {
+    "E1->H1": 0.5,
+    "E2->H1": 2.0,
+    "E3->H2": 5.0,
+    "E4->H2": 10.0,
+    "H1->H2": 2.0
+  }
 }

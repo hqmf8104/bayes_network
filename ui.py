@@ -26,9 +26,13 @@ from streamlit.runtime.scriptrunner.script_runner import RerunException
 # a) Functions
 # -----------------------------
 
-def rerun_app():
-    """Abort this run and force Streamlit to re-execute the script from top."""
-    raise RerunException()
+def get_prob_color(prob: float) -> str:
+    # Simple red (low) → green (high) gradient
+    r = int((1 - prob) * 255)
+    g = int(prob * 255)
+    b = 100  # fixed for contrast
+    return f"rgb({r},{g},{b})"
+
 
 def clean_state(g):
     # 1) Remove priors for hypotheses that no longer exist
@@ -574,7 +578,7 @@ try:
             "hierarchical": {
                 "enabled": True,
                 "levelSeparation": 150,
-                "nodeSpacing": 200,
+                "nodeSpacing": 350,
                 "treeSpacing": 200,
                 "direction": "UD",
                 "sortMethod": "directed",
@@ -607,16 +611,45 @@ try:
 
     # add nodes as before
     for n in g.nodes:
-        raw_desc = g.nodes[n].get("description", "")
-        wrapped = textwrap.fill(raw_desc, width=50)
-        label = f"{n}\n{wrapped}" if wrapped else n
+        node_data = g.nodes[n]
+        desc = node_data.get("description", "")
+        wrapped = textwrap.fill(desc, width=50)
+
+        prob = None
+        if node_data["group"] == "hypothesis":
+            # Use Calc Prior (%)
+            prior_label = st.session_state.priors.get(n, "")
+            p0 = LABEL_TO_DECIMAL.get(prior_label, None)
+            if p0 is not None:
+                p0 = max(min(p0, 0.9999), 0.0001)
+                b0 = math.log(p0 / (1 - p0))
+                z = b0
+                for parent in g.predecessors(n):
+                    if g.nodes[parent]["group"] == "evidence":
+                        r = st.session_state.edge_strengths.get((parent, n), 1.0)
+                        b_i = math.log(r) if r > 0 else 0.0
+                        t_i = LABEL_TO_DECIMAL.get(st.session_state.truth_probs.get(parent, ""), 0.0)
+                        z += b_i * t_i
+                prob = sigmoid(z)
+
+        elif node_data["group"] == "evidence":
+            truth_label = st.session_state.truth_probs.get(n, "")
+            prob = LABEL_TO_DECIMAL.get(truth_label, None)
+
+        color = get_prob_color(prob) if prob is not None else "gray"
+        prob_str = f"{prob * 100:.1f}%" if prob is not None else "?"
+
+        label = f"{n}\n{wrapped}\n({prob_str})"
+
         tmp_net.add_node(
             n,
             label=label,
-            title=raw_desc,
+            title=desc,
             shape="box",
-            font={"multi": True, "align": "left"}
+            font={"multi": True, "align": "left"},
+            color=color,
         )
+
 
     # add edges with dynamic color & width
     for u, v in g.edges:
