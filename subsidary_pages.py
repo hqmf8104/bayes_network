@@ -4,21 +4,23 @@ def page1():
 
     return st.markdown(
             """
+            ## ❓ Why use Evidence Network Builder
+            Complex analysis of probabilistic events is complicated... Whilst analysts are good at estimating probabilities over small, well understood domains, they perform badly over large ones. Moreover, they rarely an intuitive understanding of how probabilistic causal events affect eachother. Finally, using structured analytic techniques have been key to winning superforecasting teams.
+
+            So... why not use a tool that takes your analysis, breaks it down into a set of small domains that you are good at estimating, links those domains to your hypothesis (and uses MATHS to calculate their probabilities), and enforces a structured analytical technique!             
+
             ## 🧠 How to use Evidence Network Builder
 
             **Build, explore & export networks of evidence and hypotheses.**
 
             1. **Import**  
-            Paste your narrative or upload a JSON to auto-extract nodes via GPT,  
-            or add/edit nodes and edges manually.
+            Paste your narrative or upload a JSON to auto-extract nodes via GPT, or add/edit nodes and edges manually.
 
             2. **Quantify**  
-            Assign qualitative **priors** to hypotheses, rate **evidence reliability**,  
-            and set **edge strength** multipliers.
+            Assign qualitative **priors** to hypotheses, rate **evidence reliability**, and set **edge strength** multipliers.
 
             3. **Analyze**  
-            View calculated probabilities, truth-tables by component,  
-            and an interactive network graph.
+            View calculated probabilities, truth-tables by component, and an interactive network graph.
 
             4. **Export**  
             Download your full network (with priors, truth-probs & weights) as JSON.
