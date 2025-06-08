@@ -1,12 +1,4 @@
 import streamlit as st
-
-# ✅ 1st: set page config
-st.set_page_config(
-    page_title="Evidence Network Builder",
-    layout="wide",
-)
-
-# ✅ All other imports
 import json
 import networkx as nx
 from pyvis.network import Network
@@ -15,15 +7,71 @@ import textwrap
 import streamlit.components.v1 as components
 import tempfile
 import os
-import textwrap
 import math
 from openai import OpenAI
 import itertools
-import streamlit as st
 from streamlit.runtime.scriptrunner.script_runner import RerunException
+from subsidary_pages import page1, page2
+
+
+# 1️⃣ Page config
+st.set_page_config(
+    page_title="Evidence Network Builder",
+    layout="wide",
+)
+
+# 2️⃣ Sidebar navigation
+page = st.sidebar.radio(
+    "📑 Navigation",
+    ["How to use", "Builder", "Predicting Probabilities is Hard"]
+)
+
+# 3️⃣ 'How to use' page
+if page == "How to use":
+    page1()
+    st.stop()
+
+# 4️⃣ 'Why Analysts Struggle' page
+elif page == "Predicting Probabilities is Hard":
+    page2()
+    st.stop()
 
 # -----------------------------
-# a) Functions
+# Common Variables
+# -----------------------------
+
+SCALE = [
+    "Remote Chance",
+    "Highly Unlikely",
+    "Unlikely",
+    "Realistic Possibility",
+    "Likely or Probable",
+    "Highly Likely",
+    "Almost Certain",
+]
+
+LABEL_TO_PERCENT = {
+    "Remote Chance":         5,
+    "Highly Unlikely":       15,
+    "Unlikely":              30,
+    "Realistic Possibility": 45,
+    "Likely or Probable":    65,
+    "Highly Likely":         85,
+    "Almost Certain":        97.5,
+}
+
+LABEL_TO_DECIMAL = {
+    "Remote Chance":         0.05,
+    "Highly Unlikely":       0.15,
+    "Unlikely":              0.30,
+    "Realistic Possibility": 0.45,
+    "Likely or Probable":    0.65,
+    "Highly Likely":         0.85,
+    "Almost Certain":        0.975,
+}
+
+# -----------------------------
+# Helper Functions
 # -----------------------------
 
 def get_prob_color(prob: float) -> str:
@@ -315,89 +363,81 @@ clean_state(g)
 # -----------------------------
 # 4) User Inputs: Priors, Evidence Reliability, Edge Strength
 # -----------------------------
-st.header("User Inputs: Priors, Evidence Reliability, Edge Strength")
+st.header("4️⃣ User Inputs: Priors, Evidence Reliability & Edge Strength")
 
-SCALE = [
-    "Remote Chance",
-    "Highly Unlikely",
-    "Unlikely",
-    "Realistic Possibility",
-    "Likely or Probable",
-    "Highly Likely",
-    "Almost Certain",
-]
-
+# Qualitative scale options
 # 4A) Priors for hypotheses
 with st.expander("🧩 Hypothesis priors", expanded=False):
+    # Explanation for users
+    st.markdown(
+        """
+        **What is a prior?** Before considering any evidence, indicate how likely you believe
+        each hypothesis is on a scale from **Remote Chance** to **Almost Certain**.
+        """
+    )
     for hy in st.session_state.network_data["hypotheses"]:
         hid     = hy["id"]
         default = st.session_state.priors.get(hid, "Realistic Possibility")
         st.session_state.priors[hid] = st.selectbox(
-            f"{hid} prior probability",
+            f"{hid} prior probability:",
             SCALE,
             index=SCALE.index(default),
+            help="Choose how plausible this hypothesis seems before seeing evidence.",
             key=f"prior_{hid}"
         )
 
 # 4B) Truth probability for evidence
 with st.expander("📄 Evidence reliability", expanded=False):
+    # Explanation for users
+    st.markdown(
+        """
+        **Evidence reliability:** How confident are you that this piece of evidence is accurate?
+        Select a value from **Unlikely** to **Almost Certain** to indicate its trustworthiness.
+        """
+    )
     for ev in st.session_state.network_data["evidence"]:
         eid     = ev["id"]
         default = st.session_state.truth_probs.get(eid, "Likely or Probable")
         st.session_state.truth_probs[eid] = st.selectbox(
-            f"{eid} probability it is true",
+            f"{eid} probability it is true:",
             SCALE,
             index=SCALE.index(default),
+            help="Choose how much you trust this evidence based on its source or quality.",
             key=f"truth_{eid}"
         )
 
 # 4C) Edge odds multipliers
 with st.expander("🔗 Edge strength (odds multipliers)", expanded=False):
+    # Explanation for users
+    st.markdown(
+        """
+        **Edge strength:** Specify how strongly each piece of evidence (or hypothesis) influences
+        another hypothesis. A multiplier >1 increases odds; <1 decreases odds.
+        For example, 2.0 doubles the odds, while 0.5 halves them.
+        """
+    )
     for conn in st.session_state.network_data["connections"]:
         u, v    = conn["source"], conn["target"]
         key     = (u, v)
         default = st.session_state.edge_strengths.get(key, 2.0)
         st.session_state.edge_strengths[key] = st.number_input(
-            f"{u} ➜ {v}  (× odds)",
+            f"{u} ➜ {v}  (× odds):",
             min_value=0.0,
             max_value=100.0,
             step=0.01,
             value=float(default),
             format="%.2f",
+            help="Multiply the base odds when evidence/hypothesis holds true.",
             key=f"weight_{u}_{v}"
         )
 
 # Confirmation that state has been updated
-st.success("💾 All user inputs stored in session_state (`priors`, `truth_probs`, `edge_strengths`)")
+st.success("💾 All user inputs stored in session_state (`priors`, `truth_probs`, `edge_strengths`) ")
 
-# === New: Save button below all expanders ===
-if st.button("💾 Save priors & weights"):
-    st.success("Priors & weights saved!")
-
-# After saving, the next rerun will pick up the updated session_state and rebuild everything
 # -----------------------------
 # 5) Network Tables
 # -----------------------------
 st.header("Network Tables")
-
-LABEL_TO_PERCENT = {
-    "Remote Chance":         5,
-    "Highly Unlikely":       15,
-    "Unlikely":              30,
-    "Realistic Possibility": 45,
-    "Likely or Probable":    65,
-    "Highly Likely":         85,
-    "Almost Certain":        97.5,
-}
-LABEL_TO_DECIMAL = {
-    "Remote Chance":         0.05,
-    "Highly Unlikely":       0.15,
-    "Unlikely":              0.30,
-    "Realistic Possibility": 0.45,
-    "Likely or Probable":    0.65,
-    "Highly Likely":         0.85,
-    "Almost Certain":        0.975,
-}
 
 def sigmoid(z: float) -> float:
     return 1.0 / (1.0 + math.exp(-z))
