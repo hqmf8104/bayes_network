@@ -29,10 +29,6 @@ function App() {
   }, []);
 
   // Node handlers
-  const handleAddNode = ({ description, prior_probability }) =>
-    createNode({ description, prior_probability }).then(res =>
-      setElements(e => [...e, { data: res.data }])
-    );
 
   const handleUpdateNode = (id, updates) =>
     updateNode(id, updates).then(res => {
@@ -66,19 +62,21 @@ function App() {
       if (selectedElement?.data.id === id) setSelectedElement(null);
     });
 
-  // Prompt & add node
+  // Prompt only for description, create node with placeholder prior of 0,
+  // then open its SidePanel so you can pick the real prior from the dropdown.
   const promptAndAddNode = () => {
     const description = prompt('Node description:');
     if (!description) return;
-    const priorStr = prompt('Prior (0–1):');
-    if (!priorStr) return;
-    const prior = parseFloat(priorStr);
-    if (isNaN(prior) || prior < 0 || prior > 1) {
-      alert('Enter a number between 0 and 1.');
-      return;
-    }
-    handleAddNode({ description, prior_probability: prior });
+
+    // Create node with a temporary 0% prior
+    createNode({ description, prior_probability: 0 }).then(res => {
+      const newNode = res.data;
+      setElements(e => [...e, { data: newNode }]);
+      // Immediately select it so the dropdown appears
+      setSelectedElement({ data: newNode });
+    });
   };
+
 
   return (
     <div style={{ display: 'flex', height: '100vh' }}>

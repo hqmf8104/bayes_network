@@ -1,16 +1,22 @@
 // client/src/components/SidePanel.js
 import React, { useState, useEffect } from 'react';
 
-// SidePanel now handles both nodes and edges
-// Pass in `element` which is the .data object from Cytoscape for a node or edge
-// For nodes, element has { id, description, prior_probability }
-// For edges, element has { id, source, target, weight }
+// Dropdown options for descriptive priors
+const PRIOR_OPTIONS = [
+  { label: '≈5%: Remote Chance', value: 0.05 },
+  { label: '≈10% - ≈20%: Highly Unlikely', value: 0.15 },
+  { label: '≈25% - ≈35%: Unlikely', value: 0.30 },
+  { label: '≈40% - <50%: Realistic Possibility', value: 0.45 },
+  { label: '≈55% - ≈75%: Likely or Probable', value: 0.65 },
+  { label: '≈80% - ≈90%: Highly Likely', value: 0.85 },
+  { label: '≈95% - <100%: Almost Certain', value: 0.975 }
+];
+
 export default function SidePanel({ element, onUpdate, onDelete }) {
   const [description, setDescription] = useState('');
   const [prior, setPrior] = useState('');
   const [weight, setWeight] = useState('');
 
-  // Sync local form state when selected element changes
   useEffect(() => {
     if (!element) {
       setDescription('');
@@ -18,14 +24,12 @@ export default function SidePanel({ element, onUpdate, onDelete }) {
       setWeight('');
       return;
     }
-    // Destructure common fields
     const { description, prior_probability, weight } = element;
     setDescription(description || '');
     setPrior(prior_probability !== undefined ? prior_probability : '');
     setWeight(weight !== undefined ? weight : '');
   }, [element]);
 
-  // If nothing selected
   if (!element) {
     return (
       <div style={{ width: 250, padding: 20, borderLeft: '1px solid #ccc' }}>
@@ -34,24 +38,16 @@ export default function SidePanel({ element, onUpdate, onDelete }) {
     );
   }
 
-  // Determine whether the element is an edge (has source) or a node
   const isEdge = element.source !== undefined;
 
-  // Handler to save changes
   const handleSave = () => {
     if (isEdge) {
       const w = parseFloat(weight);
-      if (isNaN(w)) {
-        alert('Weight must be a number.');
-        return;
-      }
+      if (isNaN(w)) return alert('Weight must be a number.');
       onUpdate({ weight: w });
     } else {
       const p = parseFloat(prior);
-      if (isNaN(p) || p < 0 || p > 1) {
-        alert('Prior must be between 0 and 1.');
-        return;
-      }
+      if (isNaN(p) || p < 0 || p > 1) return alert('Please select a valid prior.');
       onUpdate({ description, prior_probability: p });
     }
   };
@@ -80,16 +76,20 @@ export default function SidePanel({ element, onUpdate, onDelete }) {
             onChange={e => setDescription(e.target.value)}
             style={{ width: '100%', marginBottom: 10 }}
           />
+
           <label>Prior probability:</label>
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            max="1"
+          <select
             value={prior}
             onChange={e => setPrior(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
+            style={{ width: '100%', marginBottom: 10, padding: '4px' }}
+          >
+            <option value="">-- Select Prior --</option>
+            {PRIOR_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </>
       )}
       <button onClick={handleSave} style={{ marginRight: 10 }}>Save</button>
