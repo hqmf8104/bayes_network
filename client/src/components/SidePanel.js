@@ -3,13 +3,15 @@ import React, { useState, useEffect } from 'react';
 
 // Dropdown options for descriptive priors
 const PRIOR_OPTIONS = [
+{ label: 'Evidence Refuted', value: 0.05 },
   { label: '≈5%: Remote Chance', value: 0.05 },
   { label: '≈10% - ≈20%: Highly Unlikely', value: 0.15 },
   { label: '≈25% - ≈35%: Unlikely', value: 0.30 },
   { label: '≈40% - <50%: Realistic Possibility', value: 0.45 },
   { label: '≈55% - ≈75%: Likely or Probable', value: 0.65 },
   { label: '≈80% - ≈90%: Highly Likely', value: 0.85 },
-  { label: '≈95% - <100%: Almost Certain', value: 0.975 }
+  { label: '≈95% - <100%: Almost Certain', value: 0.975 },
+  { label: 'Evidence Confirmed', value: 1.0 },
 ];
 
 export default function SidePanel({ element, onUpdate, onDelete }) {
@@ -40,17 +42,24 @@ export default function SidePanel({ element, onUpdate, onDelete }) {
 
   const isEdge = element.source !== undefined;
 
-  const handleSave = () => {
+  const handleSave = async () => {
+  try {
     if (isEdge) {
       const w = parseFloat(weight);
-      if (isNaN(w)) return alert('Weight must be a number.');
-      onUpdate({ weight: w });
+      if (isNaN(w)) throw new Error('Weight must be a number.');
+      await onUpdate({ weight: w });
     } else {
       const p = parseFloat(prior);
-      if (isNaN(p) || p < 0 || p > 1) return alert('Please select a valid prior.');
-      onUpdate({ description, prior_probability: p });
+      if (isNaN(p)) throw new Error('Please select a valid prior.');
+      await onUpdate({ description, prior_probability: p });
     }
-  };
+    alert('Saved!');
+  } catch (err) {
+    console.error(err);
+    alert('Save failed: ' + (err.response?.data?.message || err.message));
+  }
+};
+
 
   return (
     <div style={{ width: 250, padding: 20, borderLeft: '1px solid #ccc' }}>
