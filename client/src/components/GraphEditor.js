@@ -48,22 +48,28 @@ export default function GraphEditor({
     });
 
     // Edge complete (drag) → add edge
+    // Replace your existing ehcomplete handler with this:
+
     cy.on('ehcomplete', event => {
       const { source, target, edge } = event;
-      const w = prompt('Edge weight?');
-      // Cancel or blank: drop the ghost edge and exit
-      if (w === null || w.trim() === '') {
-        cy.remove(edge);
-        return;
-      }
-      const weight = parseFloat(w);
-      if (isNaN(weight)) {
-        alert('Please enter a valid number.');
-        cy.remove(edge);
-        return;
-      }
-      onAddEdge({ source: source.id(), target: target.id(), weight });
+
+      // 1) Create the edge on the backend with a placeholder weight
+      onAddEdge({ source: source.id(), target: target.id(), weight: 0 })
+        .then(res => {
+          // 2) Update the Cytoscape edge with the real data (including ID & actual weight)
+          edge.data(res.data);
+          // 3) Select it so the SidePanel opens and lets the user set the weight in the form
+          onSelectEdge && onSelectEdge(res.data);
+        })
+        .catch(err => {
+          console.error('Edge creation failed:', err);
+          // 4) If the API call fails, remove the temporary edge
+          cy.remove(edge);
+        });
     });
+
+
+
 
 
 
@@ -104,7 +110,7 @@ export default function GraphEditor({
   selector: 'node',
   style: {
     shape: 'round-rectangle',
-    label: 'data(description)',
+    label: 'data(label)',
     'text-valign': 'center',
     'text-halign': 'center',
     'text-wrap': 'wrap',

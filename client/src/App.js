@@ -21,7 +21,12 @@ function App() {
   useEffect(() => {
     Promise.all([fetchNodes(), fetchEdges()])
       .then(([nRes, eRes]) => {
-        const nodeEls = nRes.data.map(n => ({ data: n }));
+        const nodeEls = nRes.data.map(n => ({
+          data: {
+            ...n,
+           label: `${n.description}\n${(n.prior_probability*100).toFixed(1)}%` 
+          }
+        }));
         const edgeEls = eRes.data.map(e => ({ data: e }));
         setElements([...nodeEls, ...edgeEls]);
       })
@@ -32,9 +37,19 @@ function App() {
 
   const handleUpdateNode = (id, updates) =>
     updateNode(id, updates).then(res => {
-      setElements(e => e.map(el => el.data.id === id ? { data: res.data } : el));
-      if (selectedElement?.data.id === id) setSelectedElement({ data: res.data });
+      const n = res.data;
+      const labeled = {
+        ...n,
+        label: `${n.description}\n${(n.prior_probability * 100).toFixed(1)}%`
+      };
+      setElements(e =>
+        e.map(el => el.data.id === id ? { data: labeled } : el)
+      );
+      if (selectedElement?.data.id === id) {
+        setSelectedElement({ data: labeled });
+      }
     });
+
 
   const handleDeleteNode = id =>
     deleteNode(id).then(() => {
