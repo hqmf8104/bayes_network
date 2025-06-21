@@ -47,3 +47,19 @@ export function updateEdge(id, updates) {
 export function deleteEdge(id) {
   return api.delete(`/edges/${id}`);
 }
+
+export function saveNetwork({ name, nodes, edges }) {
+  return axios.post('/api/networks', { name, nodes, edges });
+}
+
+export function listNetworks() {
+  return axios.get('/api/networks');
+}
+
+export function loadNetwork(id) {
+  return axios.get(`/api/networks/${id}`);
+}
+
+export function updateNetwork(id, { name, nodes, edges }) {
+  return axios.put(`/api/networks/${id}`, { name, nodes, edges });
+}

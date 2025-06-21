@@ -9,6 +9,7 @@ app.use(bodyParser.json());
 
 let nodes = [];
 let edges = [];
+let networks = {}; 
 
 // --- Node routes ---
 app.get('/nodes', (req, res) => res.json(nodes));
@@ -45,6 +46,35 @@ app.patch('/edges/:id', (req, res) => {
 app.delete('/edges/:id', (req, res) => {
   edges = edges.filter(e => e.id !== req.params.id);
   res.sendStatus(204);
+});
+
+// Network Routes
+// 1) Create (save) a network
+app.post('/api/networks', (req, res) => {
+  const { name, nodes, edges } = req.body;
+  const id = uuidv4();
+  networks[id] = { id, name, nodes, edges };
+  res.status(201).json(networks[id]);
+});
+
+// 2) List all networks
+app.get('/api/networks', (req, res) => {
+  res.json(Object.values(networks));
+});
+
+// 3) Retrieve one network
+app.get('/api/networks/:id', (req, res) => {
+  const net = networks[req.params.id];
+  if (!net) return res.status(404).send('Not found');
+  res.json(net);
+});
+
+// 4) Update a network (overwrite with new nodes/edges)
+app.put('/api/networks/:id', (req, res) => {
+  const { name, nodes, edges } = req.body;
+  if (!networks[req.params.id]) return res.status(404).send('Not found');
+  networks[req.params.id] = { id: req.params.id, name, nodes, edges };
+  res.json(networks[req.params.id]);
 });
 
 const PORT = process.env.PORT || 4000;
