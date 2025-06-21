@@ -51,17 +51,30 @@ export default function GraphEditor({
     cy.on('ehcomplete', event => {
       const { source, target, edge } = event;
       const w = prompt('Edge weight?');
-      if (w !== null) onAddEdge({ source: source.id(), target: target.id(), weight: parseFloat(w) });
-      else cy.remove(edge);
+      // Cancel or blank: drop the ghost edge and exit
+      if (w === null || w.trim() === '') {
+        cy.remove(edge);
+        return;
+      }
+      const weight = parseFloat(w);
+      if (isNaN(weight)) {
+        alert('Please enter a valid number.');
+        cy.remove(edge);
+        return;
+      }
+      onAddEdge({ source: source.id(), target: target.id(), weight });
     });
 
+
+
     // Edge click → select and update weight
+    // D) Edge click → select only
     cy.on('tap', 'edge', evt => {
       const data = evt.target.data();
       onSelectEdge && onSelectEdge(data);
-      const w = prompt('New weight?', data.weight);
-      if (w !== null) onUpdateEdge(evt.target.id(), { weight: parseFloat(w) });
     });
+
+
 
     // Edge right-click → delete
     cy.on('cxttap', 'edge', evt => {
@@ -86,24 +99,54 @@ export default function GraphEditor({
       layout={{ name: 'cose' }}
       cy={onCyReady}
       stylesheet={[
-        {
-          selector: 'node.selected',
-          style: { 'border-color': '#f00', 'border-width': 3 }
-        },
-        {
-          selector: 'node.selected-shift',
-          style: { 'border-color': '#00f', 'border-width': 3 }
-        },
-        {
-          selector: 'edge',
-          style: {
-            'curve-style': 'bezier',
-            'target-arrow-shape': 'triangle',
-            'target-arrow-color': '#999',
-            'line-color': '#999'
-          }
-        }
-      ]}
+  // Default node style: show description, rounded rectangle
+  {
+  selector: 'node',
+  style: {
+    shape: 'round-rectangle',
+    label: 'data(description)',
+    'text-valign': 'center',
+    'text-halign': 'center',
+    'text-wrap': 'wrap',
+    'text-max-width': '100px',   // limit before wrapping
+    width: '100px',              // fixed width
+    height: '50px',
+    padding: '10px',
+    'background-color': '#ddd',
+    'border-width': 1,
+    'border-color': '#999'
+    }
+  },
+
+  // Node selected (for sidebar editing)
+  {
+    selector: 'node:selected',
+    style: {
+      'border-color': '#f00',
+      'border-width': 3
+    }
+  },
+  // Shift‐mode selected
+  {
+    selector: 'node.selected-shift',
+    style: {
+      'border-color': '#00f',
+      'border-width': 3
+    }
+  },
+  // Edges with arrows
+  {
+    selector: 'edge',
+    style: {
+      'curve-style': 'bezier',
+      'target-arrow-shape': 'triangle',
+      'target-arrow-color': '#999',
+      'line-color': '#999'
+    }
+  }
+]}
+
+
     />
   );
 }
